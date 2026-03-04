@@ -1,0 +1,398 @@
+[
+  {
+    "address": "KBL 1",
+    "fullAddress": "Kerckeboschlaan 1",
+    "postcode": "3708 XH",
+    "sales": [
+      {
+        "date": "2017-12-01",
+        "price": null,
+        "askingPrice": null,
+        "source": "kadastralekaart.com",
+        "note": "Sold Dec 2017, exact price behind paywall. New build 2014, sold once since."
+      }
+    ],
+    "estimatedValue": {
+      "low": 1231000,
+      "high": 1431000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1403000,
+      "value2024": 1243000,
+      "value2023": 1212000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "KBL 3",
+    "fullAddress": "Kerckeboschlaan 3",
+    "postcode": "3708 XH",
+    "sales": [],
+    "estimatedValue": {
+      "low": 1145000,
+      "high": 1331000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1302000,
+      "value2024": 1151000,
+      "value2023": 1132000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "KBL 5",
+    "fullAddress": "Kerckeboschlaan 5",
+    "postcode": "3708 XH",
+    "sales": [],
+    "estimatedValue": {
+      "low": 1154000,
+      "high": 1341000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1294000,
+      "value2024": 1147000,
+      "value2023": 1126000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "KBL 7",
+    "fullAddress": "Kerckeboschlaan 7",
+    "postcode": "3708 XH",
+    "sales": [],
+    "estimatedValue": {
+      "low": 1144000,
+      "high": 1330000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1292000,
+      "value2024": 1143000,
+      "value2023": 1124000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "KBL 9",
+    "fullAddress": "Kerckeboschlaan 9",
+    "postcode": "3708 XH",
+    "sales": [],
+    "estimatedValue": {
+      "low": 1222000,
+      "high": 1420000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1696000,
+      "value2024": 1380000,
+      "value2023": 1206000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 1",
+    "fullAddress": "Prinses Arianelaan 1",
+    "postcode": "3708 XG",
+    "sales": [
+      {
+        "date": "2014-03-07",
+        "price": 435000,
+        "askingPrice": 435000,
+        "source": "miljoenhuizen.nl",
+        "note": "Original new-build purchase"
+      },
+      {
+        "date": "2022-04-22",
+        "price": 850000,
+        "askingPrice": 850000,
+        "source": "funda.nl + miljoenhuizen.nl",
+        "note": "Verkocht met vraagprijs \u20ac850.000 k.k."
+      }
+    ],
+    "estimatedValue": {
+      "low": 1023000,
+      "high": 1218000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1088000,
+      "value2024": 1014000,
+      "value2023": 951000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 3",
+    "fullAddress": "Prinses Arianelaan 3",
+    "postcode": "3708 XG",
+    "sales": [],
+    "estimatedValue": {
+      "low": 993000,
+      "high": 1155000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": null,
+      "value2024": 870000,
+      "value2023": 797000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 5",
+    "fullAddress": "Prinses Arianelaan 5",
+    "postcode": "3708 XG",
+    "sales": [
+      {
+        "date": "2025-07-09",
+        "price": 1275000,
+        "askingPrice": 1275000,
+        "source": "funda.nl (verified)",
+        "note": "Listed 23-06-2025, verkocht 09-07-2025 met vraagprijs. Looptijd 2 weken."
+      }
+    ],
+    "estimatedValue": {
+      "low": 1288000,
+      "high": 1496000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1334000,
+      "value2024": 1182000,
+      "value2023": 1159000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 7",
+    "fullAddress": "Prinses Arianelaan 7",
+    "postcode": "3708 XG",
+    "sales": [],
+    "estimatedValue": {
+      "low": 1262000,
+      "high": 1467000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1404000,
+      "value2024": 1242000,
+      "value2023": 1215000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 9",
+    "fullAddress": "Prinses Arianelaan 9",
+    "postcode": "3708 XG",
+    "sales": [],
+    "estimatedValue": {
+      "low": 1234000,
+      "high": 1435000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1372000,
+      "value2024": 1213000,
+      "value2023": 1190000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 11",
+    "fullAddress": "Prinses Arianelaan 11",
+    "postcode": "3708 XG",
+    "sales": [],
+    "estimatedValue": {
+      "low": 1197000,
+      "high": 1385000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1370000,
+      "value2024": 1212000,
+      "value2023": 1186000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 13",
+    "fullAddress": "Prinses Arianelaan 13",
+    "postcode": "3708 XG",
+    "sales": [
+      {
+        "date": "2014-03-07",
+        "price": 395000,
+        "askingPrice": 395000,
+        "source": "miljoenhuizen.nl",
+        "note": "Original new-build purchase"
+      },
+      {
+        "date": "2023-12-01",
+        "price": null,
+        "askingPrice": 800000,
+        "source": "funda.nl + miljoenhuizen.nl + kadastralekaart.com",
+        "note": "Listed 07-10-2023 for \u20ac800.000. Sold Dec 2023 (Kadaster). Exact sale price behind paywall."
+      }
+    ],
+    "estimatedValue": {
+      "low": 1044000,
+      "high": 1172000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": null,
+      "value2024": 878000,
+      "value2023": 805000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 15",
+    "fullAddress": "Prinses Arianelaan 15",
+    "postcode": "3708 XG",
+    "sales": [],
+    "estimatedValue": {
+      "low": 996000,
+      "high": 1158000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1108000,
+      "value2024": 1021000,
+      "value2023": 968000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 17",
+    "fullAddress": "Prinses Arianelaan 17",
+    "postcode": "3708 XG",
+    "sales": [
+      {
+        "date": "2018-06-01",
+        "price": null,
+        "askingPrice": null,
+        "source": "kadastralekaart.com + kadasterdata.nl",
+        "note": "Sold June 2018. Vrijstaand, 230m\u00b2, largest house in Wijk Dudok. Exact price behind paywall. Sold once since 1993."
+      }
+    ],
+    "estimatedValue": {
+      "low": 1523000,
+      "high": 1770000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1780000,
+      "value2024": 1489000,
+      "value2023": 1304000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 19",
+    "fullAddress": "Prinses Arianelaan 19",
+    "postcode": "3708 XG",
+    "sales": [],
+    "estimatedValue": {
+      "low": 1247000,
+      "high": 1449000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1313000,
+      "value2024": 1164000,
+      "value2023": 1141000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 21",
+    "fullAddress": "Prinses Arianelaan 21",
+    "postcode": "3708 XG",
+    "sales": [],
+    "estimatedValue": {
+      "low": 1232000,
+      "high": 1432000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1333000,
+      "value2024": 1183000,
+      "value2023": 1160000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 23",
+    "fullAddress": "Prinses Arianelaan 23",
+    "postcode": "3708 XG",
+    "sales": [],
+    "estimatedValue": {
+      "low": 1290000,
+      "high": 1499000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1275000,
+      "value2024": 1132000,
+      "value2023": 1111000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  },
+  {
+    "address": "PAL 25",
+    "fullAddress": "Prinses Arianelaan 25",
+    "postcode": "3708 XG",
+    "sales": [],
+    "estimatedValue": {
+      "low": 1213000,
+      "high": 1409000,
+      "source": "Huispedia",
+      "date": "2026-02"
+    },
+    "woz": {
+      "value2025": 1357000,
+      "value2024": 1201000,
+      "value2023": 1200000,
+      "source": "kadaster.nl/lvwoz",
+      "date": "2026-03-04"
+    }
+  }
+]

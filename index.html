@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WOZ Wijk Dudok - Zeist</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="description" content="WOZ-waarden voor wijk Dudok in Zeist">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            color: white;
+            padding: 0.5rem 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1000;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .controls {
+            display: none;
+        }
+        .map-controls {
+            display: flex;
+            gap: 0.4rem;
+            padding: 0.4rem 0.5rem;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+        .map-controls .btn {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+        
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 120px);
+            overflow: hidden;
+        }
+        
+        .left-panel {
+            flex: 0 0 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .right-panel {
+            flex: 1;
+            overflow-y: auto;
+            border-left: 1px solid #e2e8f0;
+        }
+        
+        .right-panel .waardeontwikkeling,
+        .right-panel .energy-panel {
+            display: none;
+            margin: 0;
+            padding: 0.75rem 1rem;
+            border-radius: 0;
+            box-shadow: none;
+        }
+        .right-panel .waardeontwikkeling.active,
+        .right-panel .energy-panel.active {
+            display: block;
+        }
+        .section-tabs {
+            display: flex;
+            border-bottom: 2px solid #e2e8f0;
+            background: white;
+            padding: 0 1rem;
+        }
+        .section-tab {
+            padding: 0.6rem 1rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #64748b;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            font-weight: 500;
+            transition: all 0.15s;
+        }
+        .section-tab.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+        .section-tab:hover {
+            color: #1e40af;
+        }
+        .right-panel h2 {
+            display: none;
+        }
+        
+        .right-panel .stats-panel {
+            margin: 0;
+            padding: 0.4rem 1rem;
+            border-radius: 0;
+            box-shadow: none;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f1f5f9;
+        }
+        .right-panel .stats-panel h2 {
+            display: none;
+        }
+        .stats-grid {
+            display: flex !important;
+            flex-wrap: wrap;
+            gap: 0.5rem 1.5rem;
+            padding: 0 !important;
+        }
+        .stat-card {
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            min-width: unset !important;
+            flex: none !important;
+        }
+        .stat-value {
+            font-size: 0.95rem !important;
+            font-weight: 600 !important;
+        }
+        .stat-label {
+            font-size: 0.7rem !important;
+            color: #64748b !important;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-layout {
+                flex-direction: column;
+                height: auto;
+                overflow: visible;
+            }
+            .left-panel {
+                flex: none;
+                height: 50vh;
+            }
+            .right-panel {
+                border-left: none;
+                border-top: 1px solid #e2e8f0;
+            }
+        }
+        
+        .map-container {
+            flex: 1;
+            min-height: 300px;
+            position: relative;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .legend {
+            background: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            min-width: 160px;
+            font-size: 0.8rem;
+            max-height: calc(100% - 20px);
+            overflow-y: auto;
+        }
+        
+        .legend h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.25rem 0;
+            font-size: 0.85rem;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(0,0,0,0.2);
+        }
+        
+        .stats-panel {
+            background: white;
+            margin: 0.5rem 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .stat-card {
+            background: #f8fafc;
+            padding: 0.5rem 0.4rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2563eb;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.15rem;
+            line-height: 1.2;
+        }
+        
+        .chart-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .chart-content {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+        }
+        
+        .comparison-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .house-selection {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .house-tag {
+            background: #e2e8f0;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .house-tag.selected {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .remove-house {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        
+        .footer {
+            background: #1e293b;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                justify-content: center;
+            }
+            
+            .legend {
+                position: static;
+                margin: 1rem;
+            }
+            
+            .map-container {
+                height: 50vh;
+                min-height: 300px;
+            }
+            
+            .chart-content {
+                margin: 0;
+                border-radius: 0;
+                max-height: 100vh;
+                height: 100vh;
+            }
+        }
+        
+        /* Waardeontwikkeling & Energy panel */
+        .waardeontwikkeling, .energy-panel {
+            display: block;
+            background: white;
+            margin: 1rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .energy-panel { display: none; border-top: 1px solid #e2e8f0; }
+        .energy-panel.active { display: block; }
+        .energy-bar { display: flex; height: 28px; border-radius: 4px; overflow: hidden; margin: 0.5rem 0; }
+        .energy-bar div { display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: white; }
+        .energy-stat-row { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+        .energy-stat-row:last-child { border-bottom: none; }
+        .energy-stat-label { color: #64748b; }
+        .energy-stat-val { font-weight: 600; }
+        
+        .wo-street-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0 1.5rem;
+        }
+        
+        .wo-street-card {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #2563eb;
+        }
+        
+        .wo-street-card h4 { margin: 0 0 0.5rem; color: #1e293b; }
+        .wo-street-card .wo-metric { display: flex; justify-content: space-between; font-size: 0.9rem; margin: 0.25rem 0; }
+        .wo-street-card .wo-val { font-weight: 600; }
+        
+        .wo-table-container {
+            overflow-x: auto;
+            margin-top: 1rem;
+        }
+        
+        .wo-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+        
+        .wo-table th, .wo-table td {
+            padding: 0.4rem 0.6rem;
+            text-align: right;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .wo-table th {
+            background: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            position: sticky;
+            top: 0;
+        }
+        
+        .wo-table th:hover { background: #e2e8f0; }
+        .wo-table th.sorted-asc::after { content: ' ▲'; }
+        .wo-table th.sorted-desc::after { content: ' ▼'; }
+        
+        .wo-table td:first-child, .wo-table th:first-child { text-align: left; }
+        .wo-table td:nth-child(2), .wo-table th:nth-child(2) { text-align: left; }
+        
+        .wo-table tr:hover { background: #f8fafc; }
+        
+        .wo-above { color: #059669; font-weight: 600; }
+        .wo-below { color: #dc2626; font-weight: 600; }
+        .wo-neutral { color: #475569; }
+        
+        .wo-tabs { display: flex; gap: 0.5rem; margin: 1rem 0; }
+        .wo-tab { padding: 0.4rem 1rem; border-radius: 4px; cursor: pointer; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 0.9rem; }
+        .wo-tab.active { background: #2563eb; color: white; border-color: #2563eb; }
+        
+        .popup-growth { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #e2e8f0; font-size: 0.85rem; color: #059669; font-weight: 600; }
+        
+        .popup-verkocht { margin-top: 0.5rem; padding: 0.4rem 0.6rem; background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #f59e0b; border-radius: 6px; font-size: 0.85rem; }
+        .popup-verkocht .verkocht-badge { display: inline-block; background: #f59e0b; color: white; padding: 0.1rem 0.4rem; border-radius: 3px; font-weight: 600; font-size: 0.75rem; margin-right: 0.3rem; }
+        .popup-verkocht .verkocht-detail { display: block; margin-top: 0.2rem; color: #92400e; font-size: 0.8rem; }
+        
+        .wo-verkocht { background: #fef3c7 !important; }
+        .wo-verkocht-badge { display: inline-block; background: #f59e0b; color: white; padding: 0.05rem 0.3rem; border-radius: 3px; font-weight: 600; font-size: 0.7rem; margin-left: 0.3rem; }
+
+        @media (max-width: 768px) {
+            .wo-street-summary { grid-template-columns: 1fr; }
+            .wo-table { font-size: 0.75rem; }
+        }
+        
+        /* Custom Leaflet popup styles */
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+        
+        .house-popup {
+            min-width: 250px;
+        }
+        
+        .popup-header {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .popup-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .popup-detail {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .popup-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏠 WOZ Wijk Dudok</h1>
+        <p>Zeist • WOZ-waarden 2014-2025 • Verkoopdata • Interactieve kaart</p>
+    </div>
+    
+
+    
+    <div class="main-layout">
+    <div class="left-panel">
+    <div class="map-container">
+        <div id="map"></div>
+        <div class="legend" id="legend">
+            <h3>WOZ-waarde 2025</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #10b981;"></div>
+                <span>€ 800k - €1.000k</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f59e0b;"></div>
+                <span>€1.000k - €1.200k</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ef4444;"></div>
+                <span>€1.200k+</span>
+            </div>
+            <h3 style="margin-top: 1rem;">Energielabels</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #10b981; border-radius: 2px;">A+</div>
+                <span>A+ (4 woningen)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #22c55e; border-radius: 2px;">A</div>
+                <span>A (14 woningen)</span>
+            </div>
+            <h3 style="margin-top: 1rem;">Woningtypen</h3>
+            <div class="legend-item">
+                <div style="width: 16px; height: 16px; text-align: center; font-size: 12px;">🏠</div>
+                <span>Twee-onder-een-kap (12x)</span>
+            </div>
+            <div class="legend-item">
+                <div style="width: 16px; height: 16px; text-align: center; font-size: 12px;">🏡</div>
+                <span>Patiowoning (4x)</span>
+            </div>
+            <div class="legend-item">
+                <div style="width: 16px; height: 16px; text-align: center; font-size: 12px;">🏘️</div>
+                <span>Vrijstaand (1x)</span>
+            </div>
+        </div>
+    </div>
+    
+        <div class="map-controls">
+            <button class="btn btn-secondary" onclick="showAllHouses()">📍 Alle huizen</button>
+            <button class="btn btn-secondary" onclick="showStreetAverages()">🏘️ Per straat</button>
+            <button class="btn btn-secondary" onclick="toggleComparison()">🔄 Vergelijk</button>
+        </div>
+    </div><!-- end left-panel -->
+    <div class="right-panel">
+    <div class="section-tabs">
+        <button class="section-tab active" onclick="showSection('waardeontwikkeling', this)">📈 Waardeontwikkeling</button>
+        <button class="section-tab" onclick="showSection('energy', this)">🏷️ Energie & Woning</button>
+    </div>
+    <div class="stats-panel">
+        <h2>📈 Wijk Statistieken</h2>
+        <div class="stats-grid" id="stats-grid">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </div>
+    <div class="waardeontwikkeling active" id="waardeontwikkeling">
+        <h2>📈 Waardeontwikkeling</h2>
+        <div class="wo-street-summary" id="wo-street-summary"></div>
+        <div class="wo-tabs">
+            <button class="wo-tab active" onclick="showWoView('growth', this)">🏆 Ranking groei</button>
+            <button class="wo-tab" onclick="showWoView('cagr', this)">📊 Ranking CAGR</button>
+            <button class="wo-tab" onclick="showWoView('yoy', this)">📅 Jaar-op-jaar</button>
+            <span id="yoy-unit-toggle" style="display:none; margin-left:12px;">
+                <button class="wo-tab" id="btn-yoy-pct" onclick="setYoyUnit('pct', this)" style="font-size:12px; padding:4px 10px;">%</button>
+                <button class="wo-tab" id="btn-yoy-eur" onclick="setYoyUnit('eur', this)" style="font-size:12px; padding:4px 10px;">€</button>
+            </span>
+        </div>
+        <div class="wo-table-container">
+            <table class="wo-table" id="wo-table">
+                <thead id="wo-thead"></thead>
+                <tbody id="wo-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="energy-panel" id="energy-panel">
+        <h2>🏷️ Energie & Woningkenmerken</h2>
+        <div class="wo-tabs" id="energy-tabs">
+            <button class="wo-tab active" onclick="showEnergyView('overview', this)">📊 Overzicht</button>
+            <button class="wo-tab" onclick="showEnergyView('table', this)">📋 Per woning</button>
+            <button class="wo-tab" onclick="showEnergyView('compare', this)">🏘️ vs Zeist</button>
+        </div>
+        <div id="energy-content"></div>
+    </div>
+    </div><!-- end right-panel -->
+    </div><!-- end main-layout -->
+
+    <div class="chart-modal" id="chart-modal">
+        <div class="chart-content">
+            <button class="close-btn" onclick="closeChart()">&times;</button>
+            <div class="chart-header">
+                <h2 id="chart-title">WOZ Ontwikkeling</h2>
+                <div class="comparison-controls">
+                    <button class="btn btn-secondary" onclick="addToComparison()">
+                        + Vergelijk meer huizen
+                    </button>
+                    <button class="btn btn-danger" onclick="clearComparison()">
+                        🗑️ Wis vergelijking
+                    </button>
+                </div>
+            </div>
+            <div class="house-selection" id="selected-houses"></div>
+            <canvas id="chart" width="800" height="400"></canvas>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>
+            Bron: <strong>wozwaardeloket.nl</strong> • Verkoopdata: <strong>Kadaster / Funda / Huispedia</strong> • 
+            Gebouwd met ❤️ voor wijk Dudok • 
+            <span id="install-prompt" style="display: none;">
+                <button class="btn btn-success" onclick="installApp()">📱 Installeer als app</button>
+            </span>
+        </p>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Chart.js + annotation plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    
+    <script>
+        // WOZ Data (uitgebreid met energielabels en woningtypen)
+        const wozData = [
+            {address: "KBL 1", fullAddress: "Kerckeboschlaan 1", residents: "Jan Jaap & Janneke", houseM2: 202, plotM2: 302, buildYear: 2014, lat: 52.0765901, lon: 5.2679338, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 338, 2015: 480, 2016: 489, 2017: 537, 2018: 690, 2019: 744, 2020: 794, 2021: 885, 2022: 978, 2023: 1212, 2024: 1243, 2025: 1403}},
+            {address: "KBL 3", fullAddress: "Kerckeboschlaan 3", residents: "Charles & Daniëlle", houseM2: 181, plotM2: 300, buildYear: 2014, lat: 52.0766458, lon: 5.2679665, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 331, 2015: 462, 2016: 473, 2017: 512, 2018: 657, 2019: 697, 2020: 744, 2021: 829, 2022: 936, 2023: 1132, 2024: 1151, 2025: 1302}},
+            {address: "KBL 5", fullAddress: "Kerckeboschlaan 5", residents: "Sjoerd & Suzanne", houseM2: 182, plotM2: 290, buildYear: 2014, lat: 52.0767706, lon: 5.2680385, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 337, 2015: 477, 2016: 488, 2017: 509, 2018: 653, 2019: 694, 2020: 741, 2021: 826, 2022: 931, 2023: 1126, 2024: 1147, 2025: 1294}},
+            {address: "KBL 7", fullAddress: "Kerckeboschlaan 7", residents: "Maarten & Rianne", houseM2: 181, plotM2: 290, buildYear: 2014, lat: 52.0768248, lon: 5.2680520, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 332, 2015: 465, 2016: 475, 2017: 509, 2018: 653, 2019: 694, 2020: 741, 2021: 826, 2022: 928, 2023: 1124, 2024: 1143, 2025: 1292}},
+            {address: "KBL 9", fullAddress: "Kerckeboschlaan 9", residents: "Rogier & Adrieke", houseM2: 190, plotM2: 334, buildYear: 2014, lat: 52.0769491, lon: 5.2680666, energyLabel: "A", houseType: "Vrijstaande woning", values: {2014: 210, 2015: 602, 2016: 606, 2017: 657, 2018: 806, 2019: 828, 2020: 865, 2021: 920, 2022: 1106, 2023: 1206, 2024: 1380, 2025: 1696}},
+            {address: "PAL 1", fullAddress: "Prinses Arianelaan 1", residents: "Daniël & Sophie", houseM2: 160, plotM2: 208, buildYear: 2014, lat: 52.0765080, lon: 5.2682465, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 285, 2015: 460, 2016: 470, 2017: 428, 2018: 555, 2019: 590, 2020: 632, 2021: 708, 2022: 809, 2023: 951, 2024: 1014, 2025: 1088}},
+            {address: "PAL 3", fullAddress: "Prinses Arianelaan 3", residents: "Joost & Fenny", houseM2: 155, plotM2: 230, buildYear: 2014, lat: 52.0765750, lon: 5.2682670, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 299, 2015: 390, 2016: 398, 2017: 429, 2018: 551, 2019: 585, 2020: 625, 2021: 698, 2022: 821, 2023: 797, 2024: 870}},
+            {address: "PAL 5", fullAddress: "Prinses Arianelaan 5", residents: "Thijs & Karen", houseM2: 190, plotM2: 289, buildYear: 2014, lat: 52.0768548, lon: 5.2683541, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 338, 2015: 480, 2016: 489, 2017: 524, 2018: 673, 2019: 715, 2020: 764, 2021: 852, 2022: 944, 2023: 1159, 2024: 1182, 2025: 1334}},
+            {address: "PAL 7", fullAddress: "Prinses Arianelaan 7", residents: "Emile & Pauline", houseM2: 200, plotM2: 326, buildYear: 2014, lat: 52.0768421, lon: 5.2685002, energyLabel: "A+", houseType: "Twee-onder-een-kap", values: {2014: 347, 2015: 502, 2016: 512, 2017: 543, 2018: 697, 2019: 740, 2020: 796, 2021: 887, 2022: 983, 2023: 1215, 2024: 1242, 2025: 1404}},
+            {address: "PAL 9", fullAddress: "Prinses Arianelaan 9", residents: "Victor & Saskia", houseM2: 193, plotM2: 315, buildYear: 2015, lat: 52.0768271, lon: 5.2686080, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 192, 2015: 490, 2016: 499, 2017: 528, 2018: 677, 2019: 719, 2020: 768, 2021: 873, 2022: 971, 2023: 1190, 2024: 1213, 2025: 1372}},
+            {address: "PAL 11", fullAddress: "Prinses Arianelaan 11", residents: "Bernhard & Miranda", houseM2: 194, plotM2: 301, buildYear: 2015, lat: 52.0768188, lon: 5.2687502, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 193, 2015: 492, 2016: 502, 2017: 537, 2018: 690, 2019: 734, 2020: 784, 2021: 875, 2022: 958, 2023: 1186, 2024: 1212, 2025: 1370}},
+            {address: "PAL 13", fullAddress: "Prinses Arianelaan 13", residents: "Jan & Emma", houseM2: 155, plotM2: 237, buildYear: 2015, lat: 52.0765930, lon: 5.2686809, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 154, 2015: 395, 2016: 403, 2017: 433, 2018: 555, 2019: 589, 2020: 629, 2021: 702, 2022: 828, 2023: 805, 2024: 878}},
+            {address: "PAL 15", fullAddress: "Prinses Arianelaan 15", residents: "Fam. Van der Louw", houseM2: 165, plotM2: 204, buildYear: 2015, lat: 52.0765285, lon: 5.2686613, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 132, 2015: 450, 2016: 459, 2017: 426, 2018: 554, 2019: 603, 2020: 646, 2021: 724, 2022: 815, 2023: 968, 2024: 1021, 2025: 1108}},
+            {address: "PAL 17", fullAddress: "Prinses Arianelaan 17", residents: "Joos & Susanne", houseM2: 230, plotM2: 374, buildYear: 2015, lat: 52.0764750, lon: 5.2689625, energyLabel: "A", houseType: "Hoekwoning", values: {2014: null, 2015: 605, 2016: 610, 2017: 686, 2018: 870, 2019: 896, 2020: 934, 2021: 994, 2022: 1165, 2023: 1304, 2024: 1489, 2025: 1780}},
+            {address: "PAL 19", fullAddress: "Prinses Arianelaan 19", residents: "Marcel & Daniela", houseM2: 188, plotM2: 275, buildYear: 2015, lat: 52.0765683, lon: 5.2689654, energyLabel: "A", houseType: "Tussenwoning", values: {2014: 178, 2015: 455, 2016: 464, 2017: 516, 2018: 666, 2019: 708, 2020: 756, 2021: 845, 2022: 928, 2023: 1141, 2024: 1164, 2025: 1313}},
+            {address: "PAL 21", fullAddress: "Prinses Arianelaan 21", residents: "Ronald & Marlène", houseM2: 187, plotM2: 278, buildYear: 2014, lat: 52.0766555, lon: 5.2689885, energyLabel: "A", houseType: "Twee-onder-een-kap", values: {2014: 188, 2015: 480, 2016: 491, 2017: 526, 2018: 677, 2019: 719, 2020: 768, 2021: 856, 2022: 946, 2023: 1160, 2024: 1183, 2025: 1333}},
+            {address: "PAL 23", fullAddress: "Prinses Arianelaan 23", residents: "Marcel & Vanessa", houseM2: 198, plotM2: 267, buildYear: 2014, lat: 52.0767588, lon: 5.2690201, energyLabel: "A", houseType: "Tussenwoning", values: {2014: 186, 2015: 475, 2016: 485, 2017: 499, 2018: 643, 2019: 683, 2020: 730, 2021: 819, 2022: 915, 2023: 1111, 2024: 1132, 2025: 1275}},
+            {address: "PAL 25", fullAddress: "Prinses Arianelaan 25", residents: "Joost & Marjolein", houseM2: 196, plotM2: 291, buildYear: 2014, lat: 52.0768083, lon: 5.2690237, energyLabel: "A", houseType: "Hoekwoning", values: {2014: 185, 2015: 472, 2016: 482, 2017: 494, 2018: 633, 2019: 672, 2020: 717, 2021: 800, 2022: 948, 2023: 1200, 2024: 1201, 2025: 1357}}
+        ];
+        
+        // Sales/transaction data (verkoopdata)
+        const salesData = {
+            "KBL 1": [
+                {date: "2017-12-01", price: null, askingPrice: null, note: "Verkocht dec 2017 — prijs niet openbaar"}
+            ],
+            "PAL 1": [
+                {date: "2014-03-07", price: 435000, askingPrice: 435000, note: "Nieuwbouw aankoop"},
+                {date: "2022-04-22", price: 850000, askingPrice: 850000, note: "Verkocht met vraagprijs"}
+            ],
+            "PAL 5": [
+                {date: "2025-07-09", price: 1275000, askingPrice: 1275000, note: "Verkocht met vraagprijs, looptijd 2 weken"}
+            ],
+            "PAL 13": [
+                {date: "2014-03-07", price: 395000, askingPrice: 395000, note: "Nieuwbouw aankoop"},
+                {date: "2023-12-01", price: null, askingPrice: 800000, note: "Vraagprijs €800k, exacte verkoopprijs niet openbaar"}
+            ],
+            "PAL 17": [
+                {date: "2018-06-01", price: null, askingPrice: null, note: "Verkocht jun 2018 — prijs niet openbaar"}
+            ]
+        };
+        
+        // Estimated current values (Huispedia, feb 2026)
+        const estimatedValues = {
+            "KBL 1": {low: 1231, high: 1431}, "KBL 3": {low: 1145, high: 1331}, "KBL 5": {low: 1154, high: 1341},
+            "KBL 7": {low: 1144, high: 1330}, "KBL 9": {low: 1222, high: 1420},
+            "PAL 1": {low: 1023, high: 1218}, "PAL 3": {low: 993, high: 1155}, "PAL 5": {low: 1288, high: 1496},
+            "PAL 7": {low: 1262, high: 1467}, "PAL 9": {low: 1234, high: 1435}, "PAL 11": {low: 1197, high: 1385},
+            "PAL 13": {low: 1044, high: 1172}, "PAL 15": {low: 996, high: 1158}, "PAL 17": {low: 1523, high: 1770},
+            "PAL 19": {low: 1247, high: 1449}, "PAL 21": {low: 1232, high: 1432}, "PAL 23": {low: 1290, high: 1499},
+            "PAL 25": {low: 1213, high: 1409}
+        };
+        
+        // Global variables
+        let map;
+        let markers = [];
+        let chart;
+        let selectedHouses = [];
+        let isComparisonMode = false;
+        let deferredPrompt;
+        
+        // Initialize map
+        function initMap() {
+            map = L.map('map').setView([52.0770, 5.2680], 17);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            addHouseMarkers();
+            updateStats();
+        }
+        
+        // Get marker color based on WOZ value
+        function getMarkerColor(wozValue) {
+            if (wozValue < 1000) return '#10b981'; // Green
+            if (wozValue < 1200) return '#f59e0b'; // Orange
+            return '#ef4444'; // Red
+        }
+        
+        // Add house markers to map
+        function addHouseMarkers() {
+            wozData.forEach(house => {
+                const currentWoz = house.values[2024];
+                const wozPerM2 = Math.round(currentWoz * 1000 / house.houseM2);
+                
+                const marker = L.circleMarker([house.lat, house.lon], {
+                    radius: 8,
+                    fillColor: getMarkerColor(currentWoz),
+                    color: 'rgba(0,0,0,0.3)',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+                
+                // Get energy label color
+                const getEnergyLabelColor = (label) => {
+                    if (label === 'A+') return '#10b981';
+                    if (label === 'A') return '#22c55e';
+                    if (label === 'B') return '#84cc16';
+                    if (label === 'C') return '#eab308';
+                    return '#64748b';
+                };
+                
+                // Build verkocht section for popup
+                const houseSales = salesData[house.address];
+                let verkochtHtml = '';
+                if (houseSales && houseSales.length > 0) {
+                    const lastSale = houseSales[houseSales.length - 1];
+                    const saleDate = new Date(lastSale.date);
+                    const dateStr = saleDate.toLocaleDateString('nl-NL', {month: 'short', year: 'numeric'});
+                    const priceStr = lastSale.price ? '€' + (lastSale.price / 1000).toLocaleString() + 'k' : 
+                                     lastSale.askingPrice ? '€' + (lastSale.askingPrice / 1000).toLocaleString() + 'k (vraagprijs)' : 'prijs onbekend';
+                    verkochtHtml = `
+                        <div class="popup-verkocht">
+                            <span class="verkocht-badge">🏷️ VERKOCHT</span> ${dateStr} — ${priceStr}
+                            <span class="verkocht-detail">${lastSale.note}</span>
+                        </div>`;
+                }
+                
+                // Estimated value
+                const est = estimatedValues[house.address];
+                const estHtml = est ? `<div class="popup-detail"><span>Geschat 2026:</span><strong>€${est.low}k–${est.high}k</strong></div>` : '';
+                
+                const popupContent = `
+                    <div class="house-popup">
+                        <div class="popup-header">${house.fullAddress}</div>
+
+                        ${verkochtHtml}
+                        <div class="popup-details">
+                            <div class="popup-detail">
+                                <span>WOZ 2024:</span>
+                                <strong>€${currentWoz.toLocaleString()}k</strong>
+                            </div>
+                            <div class="popup-detail">
+                                <span>Per m²:</span>
+                                <strong>€${wozPerM2.toLocaleString()}</strong>
+                            </div>
+                            ${estHtml}
+                            <div class="popup-detail">
+                                <span>Woningtype:</span>
+                                <span>${house.houseType}</span>
+                            </div>
+                            <div class="popup-detail">
+                                <span>Energielabel:</span>
+                                <strong style="color: ${getEnergyLabelColor(house.energyLabel)};">
+                                    🏷️ ${house.energyLabel}
+                                </strong>
+                            </div>
+                            <div class="popup-detail">
+                                <span>Huis m²:</span>
+                                <span>${house.houseM2} m²</span>
+                            </div>
+                            <div class="popup-detail">
+                                <span>Perceel:</span>
+                                <span>${house.plotM2} m²</span>
+                            </div>
+                            <div class="popup-detail">
+                                <span>Bouwjaar:</span>
+                                <span>${house.buildYear}</span>
+                            </div>
+                        </div>
+                        <div class="popup-growth">${getGrowthSummary(house)}</div>
+                        <div class="popup-actions">
+                            <button class="btn btn-primary" onclick="showHouseChart('${house.address}')">
+                                📊 Historie bekijken
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                marker.addTo(map);
+                markers.push({marker, house});
+            });
+        }
+        
+        // Show chart for specific house
+        function showHouseChart(address) {
+            const house = wozData.find(h => h.address === address);
+            if (!house) return;
+            
+            if (!selectedHouses.includes(address)) {
+                selectedHouses = [address];
+            }
+            
+            updateChart();
+            document.getElementById('chart-modal').style.display = 'flex';
+        }
+        
+        // Update chart with selected houses
+        function updateChart() {
+            const ctx = document.getElementById('chart').getContext('2d');
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            const years = Object.keys(wozData[0].values);
+            const datasets = [];
+            
+            selectedHouses.forEach((address, index) => {
+                const house = wozData.find(h => h.address === address);
+                if (!house) return;
+                
+                const data = years.map(year => house.values[year]).filter(val => val !== null);
+                const labels = years.filter(year => house.values[year] !== null);
+                
+                const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16'];
+                
+                datasets.push({
+                    label: `${house.fullAddress} (${house.energyLabel} • ${house.houseType})`,
+                    data: data,
+                    borderColor: colors[index % colors.length],
+                    backgroundColor: colors[index % colors.length] + '20',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.1,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                });
+            });
+            
+            // Build sale annotations for selected houses
+            const saleAnnotations = {};
+            selectedHouses.forEach((address, idx) => {
+                const sales = salesData[address];
+                if (!sales) return;
+                sales.forEach((sale, si) => {
+                    if (sale.date === sale.date) { // always true, just iterate
+                        const saleYear = new Date(sale.date).getFullYear();
+                        const priceK = sale.price ? Math.round(sale.price / 1000) : (sale.askingPrice ? Math.round(sale.askingPrice / 1000) : null);
+                        if (!priceK) return; // skip sales without known price
+                        const yearIdx = years.indexOf(String(saleYear));
+                        if (yearIdx === -1) return;
+                        const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                        const key = `sale_${address}_${si}`;
+                        // Vertical line
+                        saleAnnotations[key + '_line'] = {
+                            type: 'line',
+                            xMin: yearIdx,
+                            xMax: yearIdx,
+                            borderColor: colors[idx % colors.length],
+                            borderWidth: 2,
+                            borderDash: [6, 4],
+                            label: {
+                                display: true,
+                                content: `Verkocht: €${priceK}k`,
+                                position: 'start',
+                                backgroundColor: colors[idx % colors.length],
+                                color: '#fff',
+                                font: {size: 11, weight: 'bold'},
+                                padding: 4,
+                                borderRadius: 4
+                            }
+                        };
+                        // Point marker at sale price
+                        saleAnnotations[key + '_point'] = {
+                            type: 'point',
+                            xValue: yearIdx,
+                            yValue: priceK,
+                            backgroundColor: '#f59e0b',
+                            borderColor: '#fff',
+                            borderWidth: 2,
+                            radius: 8
+                        };
+                    }
+                });
+            });
+            
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: selectedHouses.length > 1 ? 'WOZ Vergelijking' : `WOZ Ontwikkeling - ${wozData.find(h => h.address === selectedHouses[0])?.fullAddress}`,
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: €${context.parsed.y.toLocaleString()}k`;
+                                }
+                            }
+                        },
+                        annotation: {
+                            annotations: saleAnnotations
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'WOZ-waarde (× €1.000)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return '€' + value.toLocaleString() + 'k';
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Jaar'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            updateSelectedHousesDisplay();
+        }
+        
+        // Update selected houses display
+        function updateSelectedHousesDisplay() {
+            const container = document.getElementById('selected-houses');
+            container.innerHTML = '';
+            
+            selectedHouses.forEach(address => {
+                const house = wozData.find(h => h.address === address);
+                if (!house) return;
+                
+                const tag = document.createElement('div');
+                tag.className = 'house-tag selected';
+                tag.innerHTML = `
+                    ${house.address} • ${house.energyLabel} • ${house.houseType}
+                    <button class="remove-house" onclick="removeFromComparison('${address}')">&times;</button>
+                `;
+                container.appendChild(tag);
+            });
+        }
+        
+        // Add house to comparison
+        function addToComparison() {
+            if (selectedHouses.length >= 5) {
+                alert('Maximum 5 huizen tegelijk vergelijken');
+                return;
+            }
+            
+            const availableHouses = wozData.filter(h => !selectedHouses.includes(h.address));
+            if (availableHouses.length === 0) {
+                alert('Alle huizen zijn al geselecteerd');
+                return;
+            }
+            
+            const address = prompt('Welk adres wil je toevoegen?\n\n' + 
+                availableHouses.map(h => `${h.address} (${h.fullAddress})`).join('\n'));
+            
+            if (address && availableHouses.find(h => h.address.toLowerCase() === address.toLowerCase() || 
+                                                h.fullAddress.toLowerCase() === address.toLowerCase())) {
+                const house = availableHouses.find(h => 
+                    h.address.toLowerCase() === address.toLowerCase() || 
+                    h.fullAddress.toLowerCase() === address.toLowerCase());
+                selectedHouses.push(house.address);
+                updateChart();
+            }
+        }
+        
+        // Remove house from comparison
+        function removeFromComparison(address) {
+            selectedHouses = selectedHouses.filter(a => a !== address);
+            if (selectedHouses.length === 0) {
+                closeChart();
+            } else {
+                updateChart();
+            }
+        }
+        
+        // Clear comparison
+        function clearComparison() {
+            selectedHouses = [];
+            closeChart();
+        }
+        
+        // Close chart modal
+        function closeChart() {
+            document.getElementById('chart-modal').style.display = 'none';
+            if (chart) {
+                chart.destroy();
+                chart = null;
+            }
+        }
+        
+        // Toggle comparison mode
+        function toggleComparison() {
+            isComparisonMode = !isComparisonMode;
+            const btn = event.target;
+            
+            if (isComparisonMode) {
+                btn.textContent = '🏠 Normale modus';
+                btn.classList.remove('btn-secondary');
+                btn.classList.add('btn-primary');
+                alert('Vergelijkmodus actief! Klik op huizen om ze toe te voegen aan de vergelijking.');
+            } else {
+                btn.textContent = '📊 Vergelijkmodus';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+                selectedHouses = [];
+                closeChart();
+            }
+        }
+        
+        // Show all houses (fit bounds)
+        function showAllHouses() {
+            const group = new L.featureGroup(markers.map(m => m.marker));
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+        
+        // Show street averages
+        function showStreetAverages() {
+            const kbl = wozData.filter(h => h.address.startsWith('KBL'));
+            const pal = wozData.filter(h => h.address.startsWith('PAL'));
+            
+            const kblAvg2025 = Math.round(kbl.reduce((sum, h) => sum + h.values[2024], 0) / kbl.length);
+            const palAvg2025 = Math.round(pal.reduce((sum, h) => sum + h.values[2024], 0) / pal.length);
+            
+            alert(`Gemiddelde WOZ-waarden 2024:\n\n` +
+                `📍 Kerckeboschlaan: €${kblAvg2025.toLocaleString()}k\n` +
+                `📍 Prinses Arianelaan: €${palAvg2025.toLocaleString()}k`);
+        }
+        
+        // Show/hide legend
+        function showLegend() {
+            const legend = document.getElementById('legend');
+            legend.style.display = legend.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function showSection(name, tabEl) {
+            // Toggle section panels
+            document.getElementById('waardeontwikkeling').classList.toggle('active', name === 'waardeontwikkeling');
+            document.getElementById('energy-panel').classList.toggle('active', name === 'energy');
+            // Update tab buttons
+            document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+            if (tabEl) tabEl.classList.add('active');
+            // Init content
+            if (name === 'waardeontwikkeling') initWaardeontwikkeling();
+            if (name === 'energy') showEnergyView('overview');
+        }
+
+        // Show energy labels overview
+        function toggleEnergyPanel() {
+            showSection('energy');
+        }
+
+        const labelColors = {'A+++':'#00845a','A++':'#00845a','A+':'#2d9a2d','A':'#52b72d','B':'#b9d30b','C':'#fff200','D':'#fdb913','E':'#f37021','F':'#ed1c24','G':'#b1132b'};
+
+        function showEnergyView(view, btn) {
+            if (btn) {
+                document.querySelectorAll('#energy-tabs .wo-tab').forEach(t => t.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            const el = document.getElementById('energy-content');
+            if (view === 'overview') renderEnergyOverview(el);
+            else if (view === 'table') renderEnergyTable(el);
+            else if (view === 'compare') renderEnergyCompare(el);
+        }
+
+        function renderEnergyOverview(el) {
+            const labels = {}; const types = {};
+            wozData.forEach(h => {
+                labels[h.energyLabel] = (labels[h.energyLabel] || 0) + 1;
+                types[h.houseType] = (types[h.houseType] || 0) + 1;
+            });
+            const totalM2 = wozData.reduce((s,h) => s + h.houseM2, 0);
+            const totalPlot = wozData.reduce((s,h) => s + h.plotM2, 0);
+            const avgM2 = Math.round(totalM2 / wozData.length);
+            const avgPlot = Math.round(totalPlot / wozData.length);
+            const avgPriceM2 = Math.round(wozData.reduce((s,h) => s + h.values[2024]*1000/h.houseM2, 0) / wozData.length);
+
+            // Label bar
+            const sorted = Object.entries(labels).sort((a,b) => a[0].localeCompare(b[0]));
+            let bar = sorted.map(([l,c]) => {
+                const pct = (c/wozData.length*100).toFixed(0);
+                return `<div style="width:${pct}%;background:${labelColors[l]||'#94a3b8'}" title="${l}: ${c}x">${l} (${c})</div>`;
+            }).join('');
+
+            let typeHtml = Object.entries(types).sort((a,b)=>b[1]-a[1]).map(([t,c]) => 
+                `<div class="energy-stat-row"><span class="energy-stat-label">${t}</span><span class="energy-stat-val">${c}x</span></div>`
+            ).join('');
+
+            el.innerHTML = `
+                <h4 style="margin:0.5rem 0 0.25rem;font-size:0.9rem;">Energielabels</h4>
+                <div class="energy-bar">${bar}</div>
+                <p style="font-size:0.8rem;color:#64748b;margin:0.25rem 0 1rem;">✨ Alle woningen minimaal label A — Wijk Dudok scoort top!</p>
+                <h4 style="margin:0 0 0.25rem;font-size:0.9rem;">Woningkenmerken</h4>
+                <div class="energy-stat-row"><span class="energy-stat-label">Gem. woonoppervlakte</span><span class="energy-stat-val">${avgM2} m²</span></div>
+                <div class="energy-stat-row"><span class="energy-stat-label">Gem. perceelgrootte</span><span class="energy-stat-val">${avgPlot} m²</span></div>
+                <div class="energy-stat-row"><span class="energy-stat-label">Gem. WOZ/m² (2024)</span><span class="energy-stat-val">€${avgPriceM2.toLocaleString()}</span></div>
+                <div class="energy-stat-row"><span class="energy-stat-label">Bouwperiode</span><span class="energy-stat-val">2014–2015</span></div>
+                <h4 style="margin:1rem 0 0.25rem;font-size:0.9rem;">Woningtypen</h4>
+                ${typeHtml}
+                <p style="font-size:0.75rem;color:#94a3b8;margin-top:1rem;">Bronnen: Energielabelatlas.nl, EP-Online (RVO), BAG, WOZ-waardeloket</p>
+            `;
+        }
+
+        function renderEnergyTable(el) {
+            const sorted = [...wozData].sort((a,b) => a.address.localeCompare(b.address));
+            let rows = sorted.map(h => {
+                const priceM2 = Math.round(h.values[2024]*1000/h.houseM2);
+                const col = labelColors[h.energyLabel] || '#94a3b8';
+                return `<tr>
+                    <td style="text-align:left">${h.address}</td>
+                    <td><span style="background:${col};color:white;padding:1px 6px;border-radius:3px;font-size:0.75rem;font-weight:600">${h.energyLabel}</span></td>
+                    <td>${h.houseM2}</td>
+                    <td>${h.plotM2}</td>
+                    <td>${h.buildYear}</td>
+                    <td>€${priceM2.toLocaleString()}</td>
+                    <td style="text-align:left;font-size:0.75rem">${h.houseType}</td>
+                </tr>`;
+            }).join('');
+            el.innerHTML = `
+                <div class="wo-table-container">
+                <table class="wo-table">
+                    <thead><tr>
+                        <th style="text-align:left">Adres</th><th>Label</th><th>m²</th><th>Perceel</th><th>Bouw</th><th>€/m²</th><th style="text-align:left">Type</th>
+                    </tr></thead>
+                    <tbody>${rows}</tbody>
+                </table></div>`;
+        }
+
+        function renderEnergyCompare(el) {
+            // CBS/Kadaster referentiedata gemeente Zeist (openbaar, 2024)
+            const zeist = { avgWoz: 493, avgM2: 125, pctLabelA: 28, avgGas: 1150, avgElec: 2800, pctWP: 12 };
+            const wijk = {
+                avgWoz: Math.round(wozData.reduce((s,h) => s+h.values[2024],0)/wozData.length),
+                avgM2: Math.round(wozData.reduce((s,h) => s+h.houseM2,0)/wozData.length),
+                pctLabelA: Math.round(wozData.filter(h => h.energyLabel.startsWith('A')).length/wozData.length*100),
+                avgGas: 0, // gasloos
+                pctWP: 100 // alle warmtepompen
+            };
+            function cmp(wijk, zeist, unit, moreIsBetter) {
+                const diff = wijk - zeist;
+                const arrow = diff > 0 ? (moreIsBetter ? '🟢 ↑' : '🔴 ↑') : diff < 0 ? (moreIsBetter ? '🔴 ↓' : '🟢 ↓') : '⚪';
+                return `<div class="energy-stat-row">
+                    <span class="energy-stat-label">${unit}</span>
+                    <span class="energy-stat-val">${arrow}</span>
+                </div>`;
+            }
+            el.innerHTML = `
+                <table class="wo-table" style="margin-top:0.5rem">
+                    <thead><tr><th style="text-align:left">Kenmerk</th><th>Wijk Dudok</th><th>Gem. Zeist</th><th></th></tr></thead>
+                    <tbody>
+                        <tr><td style="text-align:left">Gem. WOZ-waarde</td><td>€${wijk.avgWoz}k</td><td>€${zeist.avgWoz}k</td><td>🟢 +${Math.round((wijk.avgWoz/zeist.avgWoz-1)*100)}%</td></tr>
+                        <tr><td style="text-align:left">Gem. woonoppervlakte</td><td>${wijk.avgM2} m²</td><td>${zeist.avgM2} m²</td><td>🟢 +${Math.round((wijk.avgM2/zeist.avgM2-1)*100)}%</td></tr>
+                        <tr><td style="text-align:left">Energielabel A of beter</td><td>${wijk.pctLabelA}%</td><td>${zeist.pctLabelA}%</td><td>🟢 +${wijk.pctLabelA-zeist.pctLabelA}pp</td></tr>
+                        <tr><td style="text-align:left">Gasverbruik</td><td>0 m³ 🌿</td><td>${zeist.avgGas.toLocaleString()} m³</td><td>🟢 Gasloos</td></tr>
+                        <tr><td style="text-align:left">Warmtepomp</td><td>${wijk.pctWP}%</td><td>${zeist.pctWP}%</td><td>🟢 +${wijk.pctWP-zeist.pctWP}pp</td></tr>
+                        <tr><td style="text-align:left">Bouwjaar</td><td>2014–2015</td><td>Gem. ~1965</td><td>🟢 Nieuwbouw</td></tr>
+                    </tbody>
+                </table>
+                <p style="font-size:0.75rem;color:#94a3b8;margin-top:0.75rem;">Gem. Zeist: CBS StatLine 2024, Kadaster, EP-Online. Gasverbruik Dudok = 0 (volledig gasloos, stadsverwarming/warmtepomp).</p>
+            `;
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const current2024Values = wozData.map(h => { const yrs = Object.keys(h.values).map(Number).filter(y => h.values[y]); return h.values[Math.max(...yrs)]; });
+            const avgWoz = Math.round(current2024Values.reduce((a, b) => a + b, 0) / current2024Values.length);
+            const maxWoz = Math.max(...current2024Values);
+            const minWoz = Math.min(...current2024Values);
+            
+            const totalHouses = wozData.length;
+            const avgHouseSize = Math.round(wozData.reduce((sum, h) => sum + h.houseM2, 0) / totalHouses);
+            const avgWozPerM2 = Math.round(avgWoz * 1000 / avgHouseSize);
+            
+            // Energy label stats
+            const energyLabels = {};
+            wozData.forEach(h => {
+                energyLabels[h.energyLabel] = (energyLabels[h.energyLabel] || 0) + 1;
+            });
+            const mostCommonLabel = Object.entries(energyLabels).sort((a, b) => b[1] - a[1])[0];
+            
+            // House type stats
+            const houseTypes = {};
+            wozData.forEach(h => {
+                houseTypes[h.houseType] = (houseTypes[h.houseType] || 0) + 1;
+            });
+            const mostCommonType = Object.entries(houseTypes).sort((a, b) => b[1] - a[1])[0];
+            
+            const statsGrid = document.getElementById('stats-grid');
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${totalHouses}</div>
+                    <div class="stat-label">Totaal huizen</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">€${avgWoz.toLocaleString()}k</div>
+                    <div class="stat-label">Gemiddelde WOZ 2025</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">€${avgWozPerM2.toLocaleString()}</div>
+                    <div class="stat-label">Gemiddeld per m²</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">€${maxWoz.toLocaleString()}k</div>
+                    <div class="stat-label">Hoogste WOZ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">€${minWoz.toLocaleString()}k</div>
+                    <div class="stat-label">Laagste WOZ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${avgHouseSize}m²</div>
+                    <div class="stat-label">Gemiddelde woonoppervlakte</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">🏷️ ${mostCommonLabel[0]}</div>
+                    <div class="stat-label">Meest voorkomend energielabel</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${mostCommonType[0]}</div>
+                    <div class="stat-label">Meest voorkomend woningtype</div>
+                </div>
+            `;
+        }
+        
+        // === Waardeontwikkeling functions ===
+        let yoyUnit = 'pct'; // 'pct' or 'eur'
+        
+        function setYoyUnit(unit, btn) {
+            yoyUnit = unit;
+            document.getElementById('btn-yoy-pct').classList.toggle('active', unit === 'pct');
+            document.getElementById('btn-yoy-eur').classList.toggle('active', unit === 'eur');
+            renderWoTable();
+        }
+        
+        function calcHouseGrowth(house) {
+            const years = Object.keys(house.values).map(Number).sort();
+            const baseYear = 2015; // Normalize all to 2015 for fair comparison
+            const firstVal = house.values[baseYear];
+            const lastVal = house.values[2024];
+            const numYears = 2025 - baseYear;
+            const firstYear = baseYear;
+            const totalGrowth = ((lastVal - firstVal) / firstVal) * 100;
+            const cagr = numYears > 0 ? (Math.pow(lastVal / firstVal, 1 / numYears) - 1) * 100 : 0;
+            
+            // Year-over-year
+            const yoy = {};
+            for (let y = 2015; y <= 2025; y++) {
+                const cur = house.values[y];
+                const prev = house.values[y - 1];
+                yoy[y] = (cur !== null && prev !== null) ? ((cur - prev) / prev) * 100 : null;
+            }
+            
+            return { firstYear, totalGrowth, cagr, yoy, address: house.address, fullAddress: house.fullAddress, woz2024: lastVal, woz2025: house.values[2025] || null };
+        }
+        
+        let allGrowthData = [];
+        let currentWoView = 'growth';
+        let currentSortCol = null;
+        let currentSortAsc = false;
+        
+        function initWaardeontwikkeling() {
+            allGrowthData = wozData.map(calcHouseGrowth);
+            const avgGrowth = allGrowthData.reduce((s, h) => s + h.totalGrowth, 0) / allGrowthData.length;
+            const avgCagr = allGrowthData.reduce((s, h) => s + h.cagr, 0) / allGrowthData.length;
+            allGrowthData.forEach(h => { h.avgGrowth = avgGrowth; h.avgCagr = avgCagr; });
+            
+            // Street summary
+            const kbl = allGrowthData.filter(h => h.address.startsWith('KBL'));
+            const pal = allGrowthData.filter(h => h.address.startsWith('PAL'));
+            const avg = (arr, fn) => arr.reduce((s, h) => s + fn(h), 0) / arr.length;
+            
+            document.getElementById('wo-street-summary').innerHTML = `
+                <div class="wo-street-card">
+                    <h4>📍 Kerckeboschlaan (${kbl.length} woningen)</h4>
+                    <div class="wo-metric"><span>Gem. groei:</span><span class="wo-val">+${avg(kbl, h=>h.totalGrowth).toFixed(1)}%</span></div>
+                    <div class="wo-metric"><span>Gem. CAGR:</span><span class="wo-val">${avg(kbl, h=>h.cagr).toFixed(1)}%</span></div>
+                    <div class="wo-metric"><span>Gem. WOZ 2024:</span><span class="wo-val">€${Math.round(avg(kbl, h=>h.woz2024))}k</span></div>
+                </div>
+                <div class="wo-street-card">
+                    <h4>📍 Prinses Arianelaan (${pal.length} woningen)</h4>
+                    <div class="wo-metric"><span>Gem. groei:</span><span class="wo-val">+${avg(pal, h=>h.totalGrowth).toFixed(1)}%</span></div>
+                    <div class="wo-metric"><span>Gem. CAGR:</span><span class="wo-val">${avg(pal, h=>h.cagr).toFixed(1)}%</span></div>
+                    <div class="wo-metric"><span>Gem. WOZ 2024:</span><span class="wo-val">€${Math.round(avg(pal, h=>h.woz2024))}k</span></div>
+                </div>
+            `;
+            
+            renderWoTable();
+        }
+        
+        function showWoView(view, btn) {
+            currentWoView = view;
+            currentSortCol = null;
+            document.querySelectorAll('.wo-tabs > .wo-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            // Show/hide unit toggle for yoy view
+            const toggle = document.getElementById('yoy-unit-toggle');
+            toggle.style.display = view === 'yoy' ? 'inline' : 'none';
+            if (view === 'yoy') {
+                document.getElementById('btn-yoy-pct').classList.toggle('active', yoyUnit === 'pct');
+                document.getElementById('btn-yoy-eur').classList.toggle('active', yoyUnit === 'eur');
+            }
+            renderWoTable();
+        }
+        
+        function renderWoTable() {
+            const thead = document.getElementById('wo-thead');
+            const tbody = document.getElementById('wo-tbody');
+            let data = [...allGrowthData];
+            const avgGrowth = data[0].avgGrowth;
+            const avgCagr = data[0].avgCagr;
+            
+            if (currentWoView === 'yoy') {
+                // Year-over-year view
+                const years = [];
+                for (let y = 2015; y <= 2025; y++) years.push(y);
+                
+                let cols = [{key:'rank',label:'#'},{key:'address',label:'Adres'},];
+                years.forEach(y => cols.push({key:'yoy_'+y, label:y+''}));
+                cols.push({key:'totalGrowth',label:'Totaal %'},{key:'cagr',label:'CAGR'});
+                
+                thead.innerHTML = '<tr>' + cols.map(c => 
+                    `<th data-col="${c.key}" onclick="sortWoTable('${c.key}')">${c.label}</th>`
+                ).join('') + '</tr>';
+                
+                if (currentSortCol) {
+                    data.sort((a, b) => {
+                        let va = getSortVal(a, currentSortCol), vb = getSortVal(b, currentSortCol);
+                        if (va === null) va = -Infinity; if (vb === null) vb = -Infinity;
+                        return currentSortAsc ? va - vb : vb - va;
+                    });
+                } else {
+                    data.sort((a, b) => b.totalGrowth - a.totalGrowth);
+                }
+                
+                tbody.innerHTML = data.map((h, i) => {
+                    const house = wozData.find(x => x.address === h.address);
+                    let row = `<td>${i+1}</td><td>${h.address}</td>`;
+                    years.forEach(y => {
+                        if (yoyUnit === 'eur') {
+                            // Show absolute euro values
+                            const val = house ? house.values[y] : null;
+                            if (val === null || val === undefined) { row += '<td>—</td>'; }
+                            else { row += `<td>€${val}k</td>`; }
+                        } else {
+                            const v = h.yoy[y];
+                            if (v === null) { row += '<td>—</td>'; }
+                            else {
+                                const cls = v > 0 ? 'wo-above' : v < 0 ? 'wo-below' : 'wo-neutral';
+                                row += `<td class="${cls}">${v > 0 ? '+' : ''}${v.toFixed(1)}%</td>`;
+                            }
+                        }
+                    });
+                    const gCls = h.totalGrowth >= avgGrowth ? 'wo-above' : 'wo-below';
+                    const cCls = h.cagr >= avgCagr ? 'wo-above' : 'wo-below';
+                    row += `<td class="${gCls}">+${h.totalGrowth.toFixed(1)}%</td>`;
+                    row += `<td class="${cCls}">${h.cagr.toFixed(1)}%</td>`;
+                    return `<tr>${row}</tr>`;
+                }).join('');
+                
+            } else {
+                // Ranking view (growth or cagr)
+                const sortKey = currentSortCol || (currentWoView === 'cagr' ? 'cagr' : 'totalGrowth');
+                if (currentSortCol) {
+                    data.sort((a, b) => {
+                        let va = getSortVal(a, currentSortCol), vb = getSortVal(b, currentSortCol);
+                        return currentSortAsc ? va - vb : vb - va;
+                    });
+                } else {
+                    data.sort((a, b) => currentWoView === 'cagr' ? b.cagr - a.cagr : b.totalGrowth - a.totalGrowth);
+                }
+                
+                const cols = currentWoView === 'cagr'
+                    ? [{key:'rank',label:'#'},{key:'address',label:'Adres'},{key:'cagr',label:'CAGR %'},{key:'totalGrowth',label:'Totale groei %'},{key:'firstYear',label:'Vanaf'},{key:'verkocht',label:'Verkocht'}]
+                    : [{key:'rank',label:'#'},{key:'address',label:'Adres'},{key:'totalGrowth',label:'Totale groei %'},{key:'cagr',label:'CAGR %'},{key:'firstYear',label:'Vanaf'},{key:'verkocht',label:'Verkocht'}];
+                
+                thead.innerHTML = '<tr>' + cols.map(c => 
+                    `<th data-col="${c.key}" onclick="sortWoTable('${c.key}')">${c.label}</th>`
+                ).join('') + '</tr>';
+                
+                tbody.innerHTML = data.map((h, i) => {
+                    const gCls = h.totalGrowth >= avgGrowth ? 'wo-above' : 'wo-below';
+                    const cCls = h.cagr >= avgCagr ? 'wo-above' : 'wo-below';
+                    const sales = salesData[h.address];
+                    let verkochtCell = '—';
+                    let rowCls = '';
+                    if (sales && sales.length > 0) {
+                        const last = sales[sales.length - 1];
+                        const d = new Date(last.date);
+                        const dateStr = d.toLocaleDateString('nl-NL', {month: 'short', year: 'numeric'});
+                        const priceStr = last.price ? '€' + Math.round(last.price/1000) + 'k' : (last.askingPrice ? '€' + Math.round(last.askingPrice/1000) + 'k*' : '');
+                        verkochtCell = `${priceStr ? priceStr + ' ' : ''}${dateStr}<span class="wo-verkocht-badge">🏷️</span>`;
+                        rowCls = ' class="wo-verkocht"';
+                    }
+                    if (currentWoView === 'cagr') {
+                        return `<tr${rowCls}>
+                            <td>${i+1}</td>
+                            <td>${h.address}</td>
+                            <td class="${cCls}">${h.cagr.toFixed(1)}%</td>
+                            <td class="${gCls}">+${h.totalGrowth.toFixed(1)}%</td>
+                            <td>${h.firstYear}</td>
+                            <td>${verkochtCell}</td>
+                        </tr>`;
+                    } else {
+                        return `<tr${rowCls}>
+                            <td>${i+1}</td>
+                            <td>${h.address}</td>
+                            <td class="${gCls}">+${h.totalGrowth.toFixed(1)}%</td>
+                            <td class="${cCls}">${h.cagr.toFixed(1)}%</td>
+                            <td>${h.firstYear}</td>
+                            <td>${verkochtCell}</td>
+                        </tr>`;
+                    }
+                }).join('');
+            }
+            
+            // Update sort indicators
+            thead.querySelectorAll('th').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+                if (th.dataset.col === currentSortCol) {
+                    th.classList.add(currentSortAsc ? 'sorted-asc' : 'sorted-desc');
+                }
+            });
+        }
+        
+        function getSortVal(h, col) {
+            if (col === 'rank') return 0;
+            if (col === 'address') return h.address;
+            if (col === 'woz2024') return h.woz2024;
+            if (col === 'woz2025') return h.woz2025 || h.woz2024;
+            if (col === 'stijging2025') return h.woz2025 && h.woz2024 ? (h.woz2025 - h.woz2024) / h.woz2024 * 100 : null;
+            if (col === 'firstYear') return h.firstYear;
+            if (col === 'totalGrowth') return h.totalGrowth;
+            if (col === 'cagr') return h.cagr;
+            if (col.startsWith('yoy_')) { const y = parseInt(col.split('_')[1]); return h.yoy[y]; }
+            return 0;
+        }
+        
+        function sortWoTable(col) {
+            if (col === 'rank') return;
+            if (currentSortCol === col) { currentSortAsc = !currentSortAsc; }
+            else { currentSortCol = col; currentSortAsc = false; }
+            renderWoTable();
+        }
+        
+        function toggleWaardeontwikkeling() {
+            showSection('waardeontwikkeling');
+        }
+        
+        function getGrowthSummary(house) {
+            const g = calcHouseGrowth(house);
+            return `📈 +${g.totalGrowth.toFixed(0)}% sinds ${g.firstYear} (CAGR ${g.cagr.toFixed(1)}%)`;
+        }
+        
+        // PWA Installation
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-prompt').style.display = 'inline';
+        });
+        
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('PWA installed');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('install-prompt').style.display = 'none';
+                });
+            }
+        }
+        
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('Service Worker registered'))
+                .catch(() => console.log('Service Worker registration failed'));
+        }
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            initWaardeontwikkeling();
+        });
+        
+        // Handle marker clicks in comparison mode
+        markers.forEach(({marker, house}) => {
+            marker.on('click', function() {
+                if (isComparisonMode) {
+                    if (selectedHouses.includes(house.address)) {
+                        removeFromComparison(house.address);
+                    } else if (selectedHouses.length < 5) {
+                        selectedHouses.push(house.address);
+                        if (selectedHouses.length === 1) {
+                            document.getElementById('chart-modal').style.display = 'flex';
+                        }
+                        updateChart();
+                    } else {
+                        alert('Maximum 5 huizen tegelijk vergelijken');
+                    }
+                }
+            });
+        });
+        
+        // Close modal on outside click
+        document.getElementById('chart-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeChart();
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeChart();
+            }
+        });
+    </script>
+</body>
+</html>

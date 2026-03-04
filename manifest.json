@@ -1,0 +1,74 @@
+{
+    "name": "WOZ Wijk Dudok - Zeist",
+    "short_name": "WOZ Dudok",
+    "description": "WOZ-waarden voor wijk Dudok in Zeist met interactieve kaart en historische grafieken",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#2563eb",
+    "orientation": "portrait-primary",
+    "scope": "/",
+    "lang": "nl",
+    "dir": "ltr",
+    "categories": ["productivity", "utilities"],
+    "icons": [
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%232563eb' rx='24'/><text x='96' y='120' font-size='80' text-anchor='middle' fill='white'>🏠</text></svg>",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%232563eb' rx='64'/><text x='256' y='320' font-size='200' text-anchor='middle' fill='white'>🏠</text></svg>",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'><rect width='144' height='144' fill='%232563eb' rx='18'/><text x='72' y='90' font-size='60' text-anchor='middle' fill='white'>🏠</text></svg>",
+            "sizes": "144x144",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Kaart bekijken",
+            "short_name": "Kaart",
+            "description": "Direct naar de interactieve kaart",
+            "url": "/#map",
+            "icons": [
+                {
+                    "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>",
+                    "sizes": "96x96"
+                }
+            ]
+        },
+        {
+            "name": "Statistieken",
+            "short_name": "Stats",
+            "description": "Bekijk wijk statistieken",
+            "url": "/#stats",
+            "icons": [
+                {
+                    "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M3 3v18h18'/><path d='M7 12l3-3 2 2 5-5'/></svg>",
+                    "sizes": "96x96"
+                }
+            ]
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect width='540' height='720' fill='%23f8fafc'/><rect x='0' y='0' width='540' height='80' fill='%232563eb'/><text x='20' y='50' fill='white' font-size='24' font-weight='bold'>WOZ Wijk Dudok</text><rect x='20' y='100' width='500' height='300' fill='%23ffffff' stroke='%23e2e8f0' stroke-width='1' rx='8'/><text x='270' y='250' text-anchor='middle' fill='%2364748b' font-size='16'>Interactieve Kaart</text><rect x='20' y='420' width='240' height='120' fill='%23ffffff' stroke='%23e2e8f0' stroke-width='1' rx='8'/><text x='140' y='480' text-anchor='middle' fill='%232563eb' font-size='32' font-weight='bold'>18</text><text x='140' y='500' text-anchor='middle' fill='%2364748b' font-size='14'>Totaal huizen</text><rect x='280' y='420' width='240' height='120' fill='%23ffffff' stroke='%23e2e8f0' stroke-width='1' rx='8'/><text x='400' y='480' text-anchor='middle' fill='%232563eb' font-size='32' font-weight='bold'>€1.164k</text><text x='400' y='500' text-anchor='middle' fill='%2364748b' font-size='14'>Gemiddelde WOZ</text></svg>",
+            "sizes": "540x720",
+            "type": "image/svg+xml",
+            "form_factor": "narrow"
+        }
+    ],
+    "related_applications": [],
+    "prefer_related_applications": false,
+    "protocol_handlers": [],
+    "edge_side_panel": {
+        "preferred_width": 400
+    }
+}
