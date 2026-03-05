@@ -1430,13 +1430,13 @@
                     <h4>📍 Kerckeboschlaan (${kbl.length} woningen)</h4>
                     <div class="wo-metric"><span>Gem. groei:</span><span class="wo-val">+${avg(kbl, h=>h.totalGrowth).toFixed(1)}%</span></div>
                     <div class="wo-metric"><span>Gem. CAGR <span class="cagr-help">?<span class="cagr-tooltip"><strong>Wat is CAGR?</strong><br>Gemiddeld jaarlijks groeipercentage van de WOZ-waarde, alsof de waarde elk jaar met hetzelfde percentage steeg.<br><br>Voorbeeld: +50% totaal over 10 jaar = ~4,1% CAGR per jaar.</span></span>:</span><span class="wo-val">${avg(kbl, h=>h.cagr).toFixed(1)}%</span></div>
-                    <div class="wo-metric"><span>Gem. WOZ 2024:</span><span class="wo-val">€${Math.round(avg(kbl, h=>h.woz2024))}k</span></div>
+                    <div class="wo-metric"><span>Gem. WOZ 2025:</span><span class="wo-val">€${Math.round(avg(kbl, h=>h.woz2025 || h.woz2024))}k</span></div>
                 </div>
                 <div class="wo-street-card">
                     <h4>📍 Prinses Arianelaan (${pal.length} woningen)</h4>
                     <div class="wo-metric"><span>Gem. groei:</span><span class="wo-val">+${avg(pal, h=>h.totalGrowth).toFixed(1)}%</span></div>
                     <div class="wo-metric"><span>Gem. CAGR <span class="cagr-help">?<span class="cagr-tooltip"><strong>Wat is CAGR?</strong><br>Gemiddeld jaarlijks groeipercentage van de WOZ-waarde, alsof de waarde elk jaar met hetzelfde percentage steeg.<br><br>Voorbeeld: +50% totaal over 10 jaar = ~4,1% CAGR per jaar.</span></span>:</span><span class="wo-val">${avg(pal, h=>h.cagr).toFixed(1)}%</span></div>
-                    <div class="wo-metric"><span>Gem. WOZ 2024:</span><span class="wo-val">€${Math.round(avg(pal, h=>h.woz2024))}k</span></div>
+                    <div class="wo-metric"><span>Gem. WOZ 2025:</span><span class="wo-val">€${Math.round(avg(pal, h=>h.woz2025 || h.woz2024))}k</span></div>
                 </div>
             `;
             
