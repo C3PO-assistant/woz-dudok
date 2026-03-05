@@ -636,11 +636,11 @@
             <h3 style="margin-top: 1rem;">Energielabels</h3>
             <div class="legend-item">
                 <div class="legend-color" style="background: #10b981; border-radius: 2px;">A+</div>
-                <span>A+ (4 woningen)</span>
+                <span id="legend-aplus">A+</span>
             </div>
             <div class="legend-item">
                 <div class="legend-color" style="background: #22c55e; border-radius: 2px;">A</div>
-                <span>A (14 woningen)</span>
+                <span id="legend-a">A</span>
             </div>
             <h3 style="margin-top: 1rem;">Woningtypen</h3>
             <div class="legend-item">
@@ -1588,7 +1588,14 @@
             if (col === 'firstYear') return h.firstYear;
             if (col === 'totalGrowth') return h.totalGrowth;
             if (col === 'cagr') return h.cagr;
-            if (col.startsWith('yoy_')) { const y = parseInt(col.split('_')[1]); return h.yoy[y]; }
+            if (col.startsWith('yoy_')) {
+                const y = parseInt(col.split('_')[1]);
+                if (yoyUnit === 'eur') {
+                    const house = wozData.find(x => x.address === h.address);
+                    return house ? (house.values[y] || null) : null;
+                }
+                return h.yoy[y];
+            }
             return 0;
         }
         
@@ -1639,6 +1646,13 @@
         document.addEventListener('DOMContentLoaded', function() {
             initMap();
             initWaardeontwikkeling();
+            // Dynamische legend energielabels
+            const labelCounts = {};
+            wozData.forEach(h => { labelCounts[h.energyLabel] = (labelCounts[h.energyLabel] || 0) + 1; });
+            const aPlus = document.getElementById('legend-aplus');
+            const aEl = document.getElementById('legend-a');
+            if (aPlus) aPlus.textContent = `A+ (${labelCounts['A+'] || 0} woningen)`;
+            if (aEl) aEl.textContent = `A (${labelCounts['A'] || 0} woningen)`;
         });
         
         // Handle marker clicks in comparison mode
