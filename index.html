@@ -1637,7 +1637,7 @@
         
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
+            navigator.serviceWorker.register('sw.js?v=3.11.0')
                 .then(() => console.log('Service Worker registered'))
                 .catch(() => console.log('Service Worker registration failed'));
         }

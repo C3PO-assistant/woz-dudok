@@ -1,4 +1,4 @@
-const CACHE_NAME = 'woz-dudok-v3.11.0';
+const CACHE_NAME = 'woz-dudok-v3.12.0';
 const urlsToCache = [
     '/',
     '/index.html',
