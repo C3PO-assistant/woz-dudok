@@ -496,6 +496,66 @@
         .wo-tabs { display: flex; gap: 0.5rem; margin: 1rem 0; }
         .wo-tab { padding: 0.4rem 1rem; border-radius: 4px; cursor: pointer; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 0.9rem; }
         .wo-tab.active { background: #2563eb; color: white; border-color: #2563eb; }
+
+        /* CAGR help tooltip */
+        .cagr-help {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #94a3b8;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 4px;
+            vertical-align: middle;
+            position: relative;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+        .cagr-help:hover { background: #2563eb; }
+        .cagr-help .cagr-tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            font-size: 12px;
+            font-weight: normal;
+            line-height: 1.5;
+            padding: 10px 14px;
+            border-radius: 8px;
+            width: 260px;
+            z-index: 9999;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+            pointer-events: none;
+        }
+        .cagr-help .cagr-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #1e293b;
+        }
+        .cagr-help:hover .cagr-tooltip { display: block; }
+        /* inside table header, tooltip opens downward */
+        th .cagr-help .cagr-tooltip {
+            bottom: auto;
+            top: calc(100% + 8px);
+        }
+        th .cagr-help .cagr-tooltip::after {
+            top: auto;
+            bottom: 100%;
+            border-top-color: transparent;
+            border-bottom-color: #1e293b;
+        }
         
         .popup-growth { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #e2e8f0; font-size: 0.85rem; color: #059669; font-weight: 600; }
         
@@ -620,7 +680,7 @@
         <div class="wo-street-summary" id="wo-street-summary"></div>
         <div class="wo-tabs">
             <button class="wo-tab active" onclick="showWoView('growth', this)">🏆 Ranking groei</button>
-            <button class="wo-tab" onclick="showWoView('cagr', this)">📊 Ranking CAGR</button>
+            <button class="wo-tab" onclick="showWoView('cagr', this)">📊 Ranking CAGR <span class="cagr-help">?<span class="cagr-tooltip"><strong>Wat is CAGR?</strong><br>Gemiddeld jaarlijks groeipercentage van de WOZ-waarde, alsof de waarde elk jaar met hetzelfde percentage steeg.<br><br>Voorbeeld: +50% totaal over 10 jaar = ~4,1% CAGR per jaar.</span></span></button>
             <button class="wo-tab" onclick="showWoView('yoy', this)">📅 Jaar-op-jaar</button>
             <span id="yoy-unit-toggle" style="display:none; margin-left:12px;">
                 <button class="wo-tab" id="btn-yoy-pct" onclick="setYoyUnit('pct', this)" style="font-size:12px; padding:4px 10px;">%</button>
@@ -1369,13 +1429,13 @@
                 <div class="wo-street-card">
                     <h4>📍 Kerckeboschlaan (${kbl.length} woningen)</h4>
                     <div class="wo-metric"><span>Gem. groei:</span><span class="wo-val">+${avg(kbl, h=>h.totalGrowth).toFixed(1)}%</span></div>
-                    <div class="wo-metric"><span>Gem. CAGR:</span><span class="wo-val">${avg(kbl, h=>h.cagr).toFixed(1)}%</span></div>
+                    <div class="wo-metric"><span>Gem. CAGR <span class="cagr-help">?<span class="cagr-tooltip"><strong>Wat is CAGR?</strong><br>Gemiddeld jaarlijks groeipercentage van de WOZ-waarde, alsof de waarde elk jaar met hetzelfde percentage steeg.<br><br>Voorbeeld: +50% totaal over 10 jaar = ~4,1% CAGR per jaar.</span></span>:</span><span class="wo-val">${avg(kbl, h=>h.cagr).toFixed(1)}%</span></div>
                     <div class="wo-metric"><span>Gem. WOZ 2024:</span><span class="wo-val">€${Math.round(avg(kbl, h=>h.woz2024))}k</span></div>
                 </div>
                 <div class="wo-street-card">
                     <h4>📍 Prinses Arianelaan (${pal.length} woningen)</h4>
                     <div class="wo-metric"><span>Gem. groei:</span><span class="wo-val">+${avg(pal, h=>h.totalGrowth).toFixed(1)}%</span></div>
-                    <div class="wo-metric"><span>Gem. CAGR:</span><span class="wo-val">${avg(pal, h=>h.cagr).toFixed(1)}%</span></div>
+                    <div class="wo-metric"><span>Gem. CAGR <span class="cagr-help">?<span class="cagr-tooltip"><strong>Wat is CAGR?</strong><br>Gemiddeld jaarlijks groeipercentage van de WOZ-waarde, alsof de waarde elk jaar met hetzelfde percentage steeg.<br><br>Voorbeeld: +50% totaal over 10 jaar = ~4,1% CAGR per jaar.</span></span>:</span><span class="wo-val">${avg(pal, h=>h.cagr).toFixed(1)}%</span></div>
                     <div class="wo-metric"><span>Gem. WOZ 2024:</span><span class="wo-val">€${Math.round(avg(pal, h=>h.woz2024))}k</span></div>
                 </div>
             `;
@@ -1412,7 +1472,7 @@
                 
                 let cols = [{key:'rank',label:'#'},{key:'address',label:'Adres'},];
                 years.forEach(y => cols.push({key:'yoy_'+y, label:y+''}));
-                cols.push({key:'totalGrowth',label:'Totaal %'},{key:'cagr',label:'CAGR'});
+                cols.push({key:'totalGrowth',label:'Totaal %'},{key:'cagr',label:'CAGR <span class="cagr-help">?<span class="cagr-tooltip"><strong>Wat is CAGR?</strong><br>Gemiddeld jaarlijks groeipercentage van de WOZ-waarde, alsof de waarde elk jaar met hetzelfde percentage steeg.<br><br>Voorbeeld: +50% totaal over 10 jaar = ~4,1% CAGR per jaar.</span></span>'});
                 
                 thead.innerHTML = '<tr>' + cols.map(c => 
                     `<th data-col="${c.key}" onclick="sortWoTable('${c.key}')">${c.label}</th>`
@@ -1446,8 +1506,8 @@
                             }
                         }
                     });
-                    const gCls = h.totalGrowth >= avgGrowth ? 'wo-above' : 'wo-below';
-                    const cCls = h.cagr >= avgCagr ? 'wo-above' : 'wo-below';
+                    const gCls = h.totalGrowth >= 0 ? 'wo-above' : 'wo-below';
+                    const cCls = h.cagr >= 0 ? 'wo-above' : 'wo-below';
                     row += `<td class="${gCls}">+${h.totalGrowth.toFixed(1)}%</td>`;
                     row += `<td class="${cCls}">${h.cagr.toFixed(1)}%</td>`;
                     return `<tr>${row}</tr>`;
@@ -1465,17 +1525,18 @@
                     data.sort((a, b) => currentWoView === 'cagr' ? b.cagr - a.cagr : b.totalGrowth - a.totalGrowth);
                 }
                 
+                const cagrLabel = 'CAGR % <span class="cagr-help">?<span class="cagr-tooltip"><strong>Wat is CAGR?</strong><br>Gemiddeld jaarlijks groeipercentage van de WOZ-waarde, alsof de waarde elk jaar met hetzelfde percentage steeg.<br><br>Voorbeeld: +50% totaal over 10 jaar = ~4,1% CAGR per jaar.</span></span>';
                 const cols = currentWoView === 'cagr'
-                    ? [{key:'rank',label:'#'},{key:'address',label:'Adres'},{key:'cagr',label:'CAGR %'},{key:'totalGrowth',label:'Totale groei %'},{key:'firstYear',label:'Vanaf'},{key:'verkocht',label:'Verkocht'}]
-                    : [{key:'rank',label:'#'},{key:'address',label:'Adres'},{key:'totalGrowth',label:'Totale groei %'},{key:'cagr',label:'CAGR %'},{key:'firstYear',label:'Vanaf'},{key:'verkocht',label:'Verkocht'}];
+                    ? [{key:'rank',label:'#'},{key:'address',label:'Adres'},{key:'cagr',label:cagrLabel},{key:'totalGrowth',label:'Totale groei %'},{key:'firstYear',label:'Vanaf'},{key:'verkocht',label:'Verkocht'}]
+                    : [{key:'rank',label:'#'},{key:'address',label:'Adres'},{key:'totalGrowth',label:'Totale groei %'},{key:'cagr',label:cagrLabel},{key:'firstYear',label:'Vanaf'},{key:'verkocht',label:'Verkocht'}];
                 
                 thead.innerHTML = '<tr>' + cols.map(c => 
                     `<th data-col="${c.key}" onclick="sortWoTable('${c.key}')">${c.label}</th>`
                 ).join('') + '</tr>';
                 
                 tbody.innerHTML = data.map((h, i) => {
-                    const gCls = h.totalGrowth >= avgGrowth ? 'wo-above' : 'wo-below';
-                    const cCls = h.cagr >= avgCagr ? 'wo-above' : 'wo-below';
+                    const gCls = h.totalGrowth >= 0 ? 'wo-above' : 'wo-below';
+                    const cCls = h.cagr >= 0 ? 'wo-above' : 'wo-below';
                     const sales = salesData[h.address];
                     let verkochtCell = '—';
                     let rowCls = '';
