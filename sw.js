@@ -1,4 +1,4 @@
-const CACHE_NAME = 'woz-dudok-v3.7.0';
+const CACHE_NAME = 'woz-dudok-v3.8.0';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -45,6 +45,11 @@ self.addEventListener('activate', event => {
             console.log('Service Worker: Activation complete');
             // Take control of all pages immediately
             return self.clients.claim();
+        }).then(() => {
+            // Force all open tabs to reload so they get the fresh cache
+            return self.clients.matchAll({ type: 'window' }).then(clients => {
+                clients.forEach(client => client.navigate(client.url));
+            });
         })
     );
 });
