@@ -1392,10 +1392,8 @@
             const years = Object.keys(house.values).map(Number).sort();
             const baseYear = 2015; // Normalize all to 2015 for fair comparison
             const firstVal = house.values[baseYear];
-            const availYears = Object.keys(house.values).map(Number).filter(y => house.values[y] != null).sort();
-            const lastAvailYear = availYears[availYears.length - 1];
-            const lastVal = house.values[lastAvailYear];
-            const numYears = lastAvailYear - baseYear;
+            const lastVal = house.values[2025] != null ? house.values[2025] : house.values[2024];
+            const numYears = 10; // Always 2015→2025 for consistent CAGR comparison
             const firstYear = baseYear;
             const totalGrowth = ((lastVal - firstVal) / firstVal) * 100;
             const cagr = numYears > 0 ? (Math.pow(lastVal / firstVal, 1 / numYears) - 1) * 100 : 0;
