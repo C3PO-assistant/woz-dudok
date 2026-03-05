@@ -1,4 +1,4 @@
-const CACHE_NAME = 'woz-dudok-v3.12.0';
+const CACHE_NAME = 'woz-dudok-v3.13.0';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -54,56 +54,40 @@ self.addEventListener('activate', event => {
     );
 });
 
-// Fetch event - serve from cache when offline
+// Fetch event - network-first for HTML, cache-first for assets
 self.addEventListener('fetch', event => {
-    // Skip non-GET requests
-    if (event.request.method !== 'GET') {
-        return;
-    }
-    
-    // Skip chrome-extension and other non-http requests
-    if (!event.request.url.startsWith('http')) {
-        return;
-    }
-    
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                // Return cached version or fetch from network
-                if (response) {
-                    console.log('Service Worker: Serving from cache', event.request.url);
-                    return response;
-                }
-                
-                console.log('Service Worker: Fetching from network', event.request.url);
+    if (event.request.method !== 'GET') return;
+    if (!event.request.url.startsWith('http')) return;
+    if (event.request.url.includes('tile.openstreetmap.org')) return;
+
+    const isHTML = event.request.destination === 'document' ||
+                   event.request.url.endsWith('.html') ||
+                   event.request.url.endsWith('/') ||
+                   !event.request.url.includes('.');
+
+    if (isHTML) {
+        // Network-first voor HTML: altijd verse versie ophalen
+        event.respondWith(
+            fetch(event.request).then(response => {
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                return response;
+            }).catch(() => caches.match(event.request))
+        );
+    } else {
+        // Cache-first voor statische assets (JS, CSS, afbeeldingen)
+        event.respondWith(
+            caches.match(event.request).then(cached => {
+                if (cached) return cached;
                 return fetch(event.request).then(response => {
-                    // Don't cache if not a success response
-                    if (!response || response.status !== 200 || response.type !== 'basic') {
-                        return response;
-                    }
-                    
-                    // Clone the response
-                    const responseToCache = response.clone();
-                    
-                    // Add to cache for future requests
-                    caches.open(CACHE_NAME)
-                        .then(cache => {
-                            // Only cache GET requests and avoid caching too many map tiles
-                            if (event.request.method === 'GET' && 
-                                !event.request.url.includes('tile.openstreetmap.org')) {
-                                cache.put(event.request, responseToCache);
-                            }
-                        });
-                    
+                    if (!response || response.status !== 200) return response;
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
                     return response;
-                }).catch(() => {
-                    // If network fails, try to serve offline fallback
-                    if (event.request.destination === 'document') {
-                        return caches.match('/index.html');
-                    }
                 });
             })
-    );
+        );
+    }
 });
 
 // Background sync for future enhancements
