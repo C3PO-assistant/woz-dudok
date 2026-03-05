@@ -569,6 +569,34 @@
         @media (max-width: 768px) {
             .wo-street-summary { grid-template-columns: 1fr; }
             .wo-table { font-size: 0.75rem; }
+
+            /* Kaart kleiner op mobiel */
+            .left-panel { height: 35vh !important; min-height: 220px; }
+            .main-layout { height: auto !important; }
+
+            /* Header compacter */
+            .header h1 { font-size: 1.1rem; }
+            .header { padding: 0.5rem 0.75rem; }
+
+            /* Stats grid compacter */
+            .stat-grid { gap: 0.5rem; }
+            .stat-card { padding: 0.5rem; }
+            .stat-value { font-size: 1.1rem; }
+
+            /* Tabs scrollen horizontaal */
+            .wo-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+            .wo-tab { white-space: nowrap; font-size: 0.8rem; padding: 0.3rem 0.7rem; }
+
+            /* Street cards full width */
+            .wo-street-card { padding: 0.75rem; }
+            .wo-metric { font-size: 0.85rem; }
+
+            /* Tabel horizontaal scrollen */
+            .wo-table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+            /* Legenda kleiner */
+            .legend { font-size: 0.75rem; padding: 0.5rem; }
+            .legend h3 { font-size: 0.85rem; margin-top: 0.5rem !important; }
         }
         
         /* Custom Leaflet popup styles */
@@ -827,7 +855,7 @@
         // Add house markers to map
         function addHouseMarkers() {
             wozData.forEach(house => {
-                const currentWoz = house.values[2024];
+                const currentWoz = house.values[2025] ?? house.values[2024];
                 const wozPerM2 = Math.round(currentWoz * 1000 / house.houseM2);
                 
                 const marker = L.circleMarker([house.lat, house.lon], {
@@ -875,7 +903,7 @@
                         ${verkochtHtml}
                         <div class="popup-details">
                             <div class="popup-detail">
-                                <span>WOZ 2024:</span>
+                                <span>WOZ 2025:</span>
                                 <strong>€${currentWoz.toLocaleString()}k</strong>
                             </div>
                             <div class="popup-detail">
@@ -1175,8 +1203,8 @@
             const kbl = wozData.filter(h => h.address.startsWith('KBL'));
             const pal = wozData.filter(h => h.address.startsWith('PAL'));
             
-            const kblAvg2025 = Math.round(kbl.reduce((sum, h) => sum + h.values[2024], 0) / kbl.length);
-            const palAvg2025 = Math.round(pal.reduce((sum, h) => sum + h.values[2024], 0) / pal.length);
+            const kblAvg2025 = Math.round(kbl.reduce((sum, h) => sum + h.values[2025] ?? h.values[2024], 0) / kbl.length);
+            const palAvg2025 = Math.round(pal.reduce((sum, h) => sum + h.values[2025] ?? h.values[2024], 0) / pal.length);
             
             alert(`Gemiddelde WOZ-waarden 2024:\n\n` +
                 `📍 Kerckeboschlaan: €${kblAvg2025.toLocaleString()}k\n` +
@@ -1229,7 +1257,7 @@
             const totalPlot = wozData.reduce((s,h) => s + h.plotM2, 0);
             const avgM2 = Math.round(totalM2 / wozData.length);
             const avgPlot = Math.round(totalPlot / wozData.length);
-            const avgPriceM2 = Math.round(wozData.reduce((s,h) => s + h.values[2024]*1000/h.houseM2, 0) / wozData.length);
+            const avgPriceM2 = Math.round(wozData.reduce((s,h) => s + (h.values[2025] ?? h.values[2024])*1000/h.houseM2, 0) / wozData.length);
 
             // Label bar
             const sorted = Object.entries(labels).sort((a,b) => a[0].localeCompare(b[0]));
@@ -1260,7 +1288,7 @@
         function renderEnergyTable(el) {
             const sorted = [...wozData].sort((a,b) => a.address.localeCompare(b.address));
             let rows = sorted.map(h => {
-                const priceM2 = Math.round(h.values[2024]*1000/h.houseM2);
+                const priceM2 = Math.round((h.values[2025] ?? h.values[2024])*1000/h.houseM2);
                 const col = labelColors[h.energyLabel] || '#94a3b8';
                 return `<tr>
                     <td style="text-align:left">${h.address}</td>
@@ -1286,7 +1314,7 @@
             // CBS/Kadaster referentiedata gemeente Zeist (openbaar, 2024)
             const zeist = { avgWoz: 493, avgM2: 125, pctLabelA: 28, avgGas: 1150, avgElec: 2800, pctWP: 12 };
             const wijk = {
-                avgWoz: Math.round(wozData.reduce((s,h) => s+h.values[2024],0)/wozData.length),
+                avgWoz: Math.round(wozData.reduce((s,h) => s+(h.values[2025] ?? h.values[2024]),0)/wozData.length),
                 avgM2: Math.round(wozData.reduce((s,h) => s+h.houseM2,0)/wozData.length),
                 pctLabelA: Math.round(wozData.filter(h => h.energyLabel.startsWith('A')).length/wozData.length*100),
                 avgGas: 0, // gasloos
@@ -1392,7 +1420,7 @@
             const years = Object.keys(house.values).map(Number).sort();
             const baseYear = 2015; // Normalize all to 2015 for fair comparison
             const firstVal = house.values[baseYear];
-            const lastVal = house.values[2025] != null ? house.values[2025] : house.values[2024];
+            const lastVal = house.values[2025] ?? house.values[2024];
             const numYears = 10; // Always 2015→2025 for consistent CAGR comparison
             const firstYear = baseYear;
             const totalGrowth = ((lastVal - firstVal) / firstVal) * 100;
@@ -1637,7 +1665,7 @@
         
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js?v=3.13.0')
+            navigator.serviceWorker.register('sw.js?v=3.14.0')
                 .then(() => console.log('Service Worker registered'))
                 .catch(() => console.log('Service Worker registration failed'));
         }
