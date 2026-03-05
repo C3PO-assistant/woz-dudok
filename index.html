@@ -577,17 +577,24 @@
             /* Header compacter */
             .header h1 { font-size: 1.1rem; }
             .header { padding: 0.5rem 0.75rem; }
+            .header-subtitle { display: none; }
 
-            /* Stats grid compacter */
-            .stat-grid { gap: 0.5rem; }
-            .stat-card { padding: 0.5rem; }
-            .stat-value { font-size: 1.1rem; }
+            /* Stats grid: netjes 3-koloms grid */
+            .stats-grid {
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 0.4rem !important;
+                flex-wrap: unset !important;
+            }
+            .stat-card { padding: 0.4rem 0.3rem !important; text-align: center; }
+            .stat-value { font-size: 0.9rem !important; }
+            .stat-label { font-size: 0.65rem !important; line-height: 1.2; }
 
             /* Tabs scrollen horizontaal */
             .wo-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
             .wo-tab { white-space: nowrap; font-size: 0.8rem; padding: 0.3rem 0.7rem; }
 
-            /* Street cards full width */
+            /* Street cards */
             .wo-street-card { padding: 0.75rem; }
             .wo-metric { font-size: 0.85rem; }
 
@@ -597,6 +604,10 @@
             /* Legenda kleiner */
             .legend { font-size: 0.75rem; padding: 0.5rem; }
             .legend h3 { font-size: 0.85rem; margin-top: 0.5rem !important; }
+
+            /* Panel padding kleiner */
+            .right-panel { padding: 0 !important; }
+            .waardeontwikkeling, .energy-panel { padding: 0.75rem !important; }
         }
         
         /* Custom Leaflet popup styles */
@@ -638,7 +649,7 @@
 <body>
     <div class="header">
         <h1>🏠 WOZ Wijk Dudok</h1>
-        <p>Zeist • WOZ-waarden 2014-2025 • Verkoopdata • Interactieve kaart</p>
+        <p class="header-subtitle">Zeist • WOZ-waarden 2014-2025 • Verkoopdata • Interactieve kaart</p>
     </div>
     
 
@@ -1665,7 +1676,7 @@
         
         // Register Service Worker
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js?v=3.14.0')
+            navigator.serviceWorker.register('sw.js?v=3.15.0')
                 .then(() => console.log('Service Worker registered'))
                 .catch(() => console.log('Service Worker registration failed'));
         }
