@@ -1392,8 +1392,10 @@
             const years = Object.keys(house.values).map(Number).sort();
             const baseYear = 2015; // Normalize all to 2015 for fair comparison
             const firstVal = house.values[baseYear];
-            const lastVal = house.values[2024];
-            const numYears = 2025 - baseYear;
+            const availYears = Object.keys(house.values).map(Number).filter(y => house.values[y] != null).sort();
+            const lastAvailYear = availYears[availYears.length - 1];
+            const lastVal = house.values[lastAvailYear];
+            const numYears = lastAvailYear - baseYear;
             const firstYear = baseYear;
             const totalGrowth = ((lastVal - firstVal) / firstVal) * 100;
             const cagr = numYears > 0 ? (Math.pow(lastVal / firstVal, 1 / numYears) - 1) * 100 : 0;
@@ -1403,7 +1405,7 @@
             for (let y = 2015; y <= 2025; y++) {
                 const cur = house.values[y];
                 const prev = house.values[y - 1];
-                yoy[y] = (cur !== null && prev !== null) ? ((cur - prev) / prev) * 100 : null;
+                yoy[y] = (cur != null && prev != null) ? ((cur - prev) / prev) * 100 : null;
             }
             
             return { firstYear, totalGrowth, cagr, yoy, address: house.address, fullAddress: house.fullAddress, woz2024: lastVal, woz2025: house.values[2025] || null };
